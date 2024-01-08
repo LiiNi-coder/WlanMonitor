@@ -11,7 +11,7 @@ std::string getInterfaceUserChoice(){
     std::map<int, std::string> interfaces;
 
     if(pcap_findalldevs(&all_interfaces, errbuf) == -1)
-        HANDLE_ERROR("pcap_findalldevs", errbuf);
+        HANDLE_ERROR_RETURN_NULLPTR("pcap_findalldevs", errbuf);
     int i=1;
     for(pcap_if_t *iter = all_interfaces; iter != NULL; iter = iter->next){
         std::string interface = std::string(iter->name);
