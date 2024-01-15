@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "ux.h"
-#include "packet.h"
+#include "parser.h"
 //global variables
 //std::queue<>
 #include <stdio.h>
@@ -33,6 +33,7 @@ int main(int argc, char* argv[]){
     struct pcap_pkthdr* packet_info;
     struct radiotap_info* current_packet_radio_header = nullptr;
     int i, res;
+    std::vector<radio_tap_header_parsed> parsed_packets;
     while(res = pcap_next_ex(pcap_descripter, &packet_info, &packet)>=0){
         //패킷이 없어서 time out되었음
         if(res==0)
@@ -42,7 +43,8 @@ int main(int argc, char* argv[]){
         //패킷 처리
         if(debug_mode)
             printHexOfPacket(packet_info, packet);
-        current_packet_radio_header = parserRadioTapHeader(packet_info, &packet);
+        
+        parserRadioTapHeader(parsed_packets, packet_info, &packet);
         //Now, packet is pointing starting of 802.11
     };
 

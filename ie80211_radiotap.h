@@ -41,3 +41,10 @@ enum ieee80211_radiotap_presence {
 	IEEE80211_RADIOTAP_VENDOR_NAMESPACE = 30,
 	IEEE80211_RADIOTAP_EXT = 31
 };
+
+inline uint32_t getMaskRadiotapPresence(enum ieee80211_radiotap_presence presence){
+	return 1<<presence;
+}
+inline uint32_t getMaskRadiotapPresence(int number_ieee80211_radiotap_presence){
+	return 1<<number_ieee80211_radiotap_presence;
+}
