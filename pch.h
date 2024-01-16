@@ -7,8 +7,10 @@
 #include <cstdint>
 #include <pcap.h>
 #include <arpa/inet.h>
-
-
+#include <cstdint>
+#include "ie80211_radiotap.h"
+#include "ux.h"
+#include "parser.h"
 #define DEBUG_VAR(var) if (debug_mode) std::cout << #var << ": " << var << std::endl;
 #define HANDLE_ERROR_RETURN_NULLPTR(func_name, errbuf) \
     do { \

@@ -2,7 +2,7 @@
 CC = g++
 
 # Compiler flags
-CFLAGS = -c -Wall
+CFLAGS = -c -Wall -DOFFLINE
 
 # Google Test library
 GTEST_LIB = -lgtest -pthread -lgtest_main

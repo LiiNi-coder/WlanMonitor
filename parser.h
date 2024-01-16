@@ -21,7 +21,6 @@ inline uint16_t convertLeU16ToHe(const unsigned char* target) {
     #endif
     return var;
 }
-
 inline int16_t convertLe16ToHe(const unsigned char* target) {
     int16_t var;
     int16_t temp = target[0] | (target[1] << 8);
@@ -34,16 +33,27 @@ inline int16_t convertLe16ToHe(const unsigned char* target) {
     #endif
     return var;
 }
-
 inline uint32_t convertLeU32ToHe(const unsigned char* target) {
     uint32_t var;
     uint32_t temp = target[0] | (target[1] << 8) | (target[2] << 16) | (target[3] << 24);
     #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-        // 리틀 엔디안 시스템에서는 패킷을 그대로 복사합니다.
         var = temp;
     #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-        // 빅 엔디안 시스템에서는 바이트 순서를 바꿉니다.
         var = (temp >> 24) | ((temp & 0x00FF0000) >> 8) | ((temp & 0x0000FF00) << 8) | (temp << 24);
+    #else
+        #error "Unknown endianness"
+    #endif
+    return var;
+}
+inline uint64_t convertLeU64ToHe(const unsigned char* target) {
+    uint64_t var;
+    uint64_t temp = (uint64_t)target[0] | ((uint64_t)target[1] << 8) | ((uint64_t)target[2] << 16) | ((uint64_t)target[3] << 24) |
+                    ((uint64_t)target[4] << 32) | ((uint64_t)target[5] << 40) | ((uint64_t)target[6] << 48) | ((uint64_t)target[7] << 56);
+    #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+        var = temp;
+    #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+        var = (temp >> 56) | ((temp & 0x00FF000000000000) >> 40) | ((temp & 0x0000FF0000000000) >> 24) | ((temp & 0x000000FF00000000) >> 8) |
+              ((temp & 0x00000000FF000000) << 8) | ((temp & 0x0000000000FF0000) << 24) | ((temp & 0x000000000000FF00) << 40) | (temp << 56);
     #else
         #error "Unknown endianness"
     #endif
@@ -139,3 +149,4 @@ void parserRadioTapHeader(
 bool parserPresentFlags(struct radio_tap_header_parsed *current_header, uint32_t present_flags);
 
 void parseAndAssignValueOfField(radio_tap_header_parsed::presence_value &field, const unsigned char *packet);
+void printRadioTapHeaderParsed(const radio_tap_header_parsed& header);

@@ -1,8 +1,4 @@
 #include "pch.h"
-#include "ux.h"
-#include "parser.h"
-//global variables
-//std::queue<>
 #include <stdio.h>
 bool debug_mode = false;
 
@@ -24,7 +20,11 @@ int main(int argc, char* argv[]){
      * 네트워크 인터페이스 interface_name에 대한 패킷을 캡처하는 디스크립트 반환
      * (네트워크 인터페이스, 받아들일수 있는 패킷 최대크기, promiscuous mode여부, 읽기 시간 초과, 에러버프)
     */
+  #ifdef OFFLINE
+    pcap_descripter = pcap_open_offline("80211packet_iptimeN150UA2.pcapng.pcap", errbuf);
+  #else
     pcap_descripter = pcap_open_live(interface_name.c_str(), BUFSIZ, 1, 1000, errbuf);
+  #endif
     if(pcap_descripter == NULL)
         HANDLE_ERROR_RETURN_0("pcap_open_live", errbuf);
     
@@ -48,5 +48,11 @@ int main(int argc, char* argv[]){
         //Now, packet is pointing starting of 802.11
     };
 
+    //시각화
+    for(radio_tap_header_parsed parsed_packet : parsed_packets){
+        printRadioTapHeaderParsed(parsed_packet);
+    }
+
+    pcap_close(pcap_descripter);
     return 0;
 }

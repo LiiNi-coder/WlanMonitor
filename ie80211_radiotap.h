@@ -1,12 +1,3 @@
-#define ieee80211_radiotap_header_LEN 64
-#pragma pack(push, 1)
-struct ieee80211_radiotap_header_essential{
-	uint8_t        it_version;     /* set to 0 */
-	uint8_t        it_pad;
-	uint16_t       it_len;         /* entire length */
-	uint32_t       it_present;     /* fields present */
-};
-
 enum ieee80211_radiotap_presence {
 	IEEE80211_RADIOTAP_TSFT = 0,
 	IEEE80211_RADIOTAP_FLAGS = 1,
@@ -187,11 +178,12 @@ namespace ieee80211_radiotap_field {
 	};
 
 	struct Tlv {
-		// 상세 정보가 주어지지 않아서, 일단 빈 구조체로 둡니다.
+		//애매모호해서 U<size>로 해석함
+		uint32_t data;
 	};
 
 	struct RadiotapNamespace {
-		// 내용이 없다고 주어져 있어서, 일단 빈 구조체로 둡니다.
+		//사용되지않음
 	};
 
 	struct VendorNamespace {
