@@ -1,11 +1,15 @@
 #include <variant>
 #include <endian.h>
 //Le = LittleEndian, He = HostEndian
-inline uint8_t convertLe8ToHe(const unsigned char* target){
+inline uint8_t convertLeU8ToHe(const unsigned char* target){
     uint8_t var = target[0];
     return var;
 }
-inline uint16_t convertLe16ToHe(const unsigned char* target) {
+inline int8_t convertLe8ToHe(const signed char* target){
+    int8_t var = target[0];
+    return var;
+}
+inline uint16_t convertLeU16ToHe(const unsigned char* target) {
     uint16_t var;
     uint16_t temp = target[0] | (target[1] << 8);
     #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
@@ -17,7 +21,21 @@ inline uint16_t convertLe16ToHe(const unsigned char* target) {
     #endif
     return var;
 }
-inline uint32_t convertLe32ToHe(const unsigned char* target) {
+
+inline int16_t convertLe16ToHe(const unsigned char* target) {
+    int16_t var;
+    int16_t temp = target[0] | (target[1] << 8);
+    #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+        var = temp;
+    #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+        var = (temp >> 8) | (temp << 8);
+    #else
+        #error "Unknown endianness"
+    #endif
+    return var;
+}
+
+inline uint32_t convertLeU32ToHe(const unsigned char* target) {
     uint32_t var;
     uint32_t temp = target[0] | (target[1] << 8) | (target[2] << 16) | (target[3] << 24);
     #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
@@ -32,27 +50,11 @@ inline uint32_t convertLe32ToHe(const unsigned char* target) {
     return var;
 }
 
-struct radio_tap_header_parsed{
-    uint8_t        version;     /* set to 0 */
-    uint8_t        pad;
-    uint16_t       len;
-    std::vector<uint32_t> present_flags;
-    bool isValidPresentFlag(uint32_t present_flag, enum ieee80211_radiotap_presence target){
-        ;// TO DO
-    };
-    struct presence_value{
-        enum ieee80211_radiotap_presence presence;
-        // TO BE CHANGED : 각 필드에 대한 구조체를 정의할지 그냥 uint형으로 저장할지
-        std::variant<uint8_t, uint16_t, uint32_t, uint64_t> value;
-    };
-    std::vector<std::vector<presence_value>> fields_of_present_flags;
-};
-
 //출처 : https://gitlab.com/gilgil/
-struct AlignSizeInfo {
+struct flag_align_size_info {
 	int size_;
 	int align_;
-} _alignSizeInfo[] {
+} _flag_align_size_info[] {
 	{8, 8}, // 0, Tsft (u64 mactime)
 	{1, 1}, // 1, Flags (u8 flags)
 	{1, 1}, // 2, Rate (u8)
@@ -87,6 +89,32 @@ struct AlignSizeInfo {
 	{0, 0}, // 31, Ext
 };
 
+using namespace ieee80211_radiotap_field;
+struct radio_tap_header_parsed{
+    uint8_t        version;     /* set to 0 */
+    uint8_t        pad;
+    uint16_t       len;
+    std::vector<uint32_t> present_flags;
+    struct presence_value{
+        enum ieee80211_radiotap_presence presence;
+        std::variant<bool, Tsft, Flags, Rate, Channel, Fhss, AntennaSignal, AntennaNoise,
+                 LockQuality, TxAttenuation, DbTxAttenuation, DbmTxPower, 
+                 Antenna, DbAntennaSignal, DbAntennaNoise, RxFlags, TxFlags, 
+                 RtsRetries, DataRetries, XChannel, Mcs, AMpdu, Vht, Times, He,
+                 HeMu, HeMuOtherUser, ZeroLengthPsdu, LSig, Tlv,
+                 RadiotapNamespace, VendorNamespace, Ext> value;
+    };
+    std::vector<std::vector<presence_value>> fields_of_present_flags;
+    auto getValueOfField(int n_present_flags, enum ieee80211_radiotap_presence presence) {
+        if (n_present_flags < fields_of_present_flags.size()) {
+            for (const auto& field : fields_of_present_flags[n_present_flags]) {
+                if (field.presence == presence)
+                    return field.value;
+            }
+        }
+        throw std::runtime_error("Presence not found");
+    }
+};
 
 void printHexOfPacket(struct pcap_pkthdr* const packet_info, const unsigned char* packet);
 /**
@@ -95,7 +123,11 @@ void printHexOfPacket(struct pcap_pkthdr* const packet_info, const unsigned char
  * @param packet_info pcap패킷 정보
  * @param packet pcap인덱스; radio tap header를 가리키고 있어야함
  */
-void parserRadioTapHeader(std::vector<radio_tap_header_parsed> &parsed_packets, struct pcap_pkthdr* const packet_info, const unsigned char** packet);
+void parserRadioTapHeader(
+        std::vector<radio_tap_header_parsed> &parsed_packets,
+        struct pcap_pkthdr* const packet_info,
+        const unsigned char **packet
+        );
 /**
  * @brief Present flags정보를 파싱해서 radio_tap_header_parsed구조체에 반영하는 함수
  * 
@@ -105,3 +137,5 @@ void parserRadioTapHeader(std::vector<radio_tap_header_parsed> &parsed_packets, 
  * @return false 다음 Present flags가 있다
  */
 bool parserPresentFlags(struct radio_tap_header_parsed *current_header, uint32_t present_flags);
+
+void parseAndAssignValueOfField(radio_tap_header_parsed::presence_value &field, const unsigned char *packet);

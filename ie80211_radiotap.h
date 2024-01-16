@@ -42,6 +42,169 @@ enum ieee80211_radiotap_presence {
 	IEEE80211_RADIOTAP_EXT = 31
 };
 
+namespace ieee80211_radiotap_field {
+	struct Tsft {
+		uint64_t mactime;
+	};
+
+	struct Flags {
+		uint8_t flags;
+	};
+
+	struct Rate {
+		uint8_t rate;
+	};
+
+	struct Channel {
+		uint16_t frequency;
+		uint16_t flags;
+	};
+
+	struct Fhss {
+		uint8_t hop_set;
+		uint8_t hop_pattern;
+	};
+
+	struct AntennaSignal {
+		int8_t signal;
+	};
+
+	struct AntennaNoise {
+		int8_t noise;
+	};
+
+	struct LockQuality {
+		uint16_t quality;
+	};
+
+	struct TxAttenuation {
+		uint16_t attenuation;
+	};
+
+	struct DbTxAttenuation {
+		uint16_t attenuation;
+	};
+
+	struct DbmTxPower {
+		int8_t power;
+	};
+
+	struct Antenna {
+		uint8_t antenna;
+	};
+
+	struct DbAntennaSignal {
+		uint8_t signal;
+	};
+
+	struct DbAntennaNoise {
+		uint8_t noise;
+	};
+
+	struct RxFlags {
+		uint16_t flags;
+	};
+
+	struct TxFlags {
+		uint16_t flags;
+	};
+
+	struct RtsRetries {
+		uint8_t retries;
+	};
+
+	struct DataRetries {
+		uint8_t retries;
+	};
+
+	struct XChannel {
+		uint32_t flags;
+		uint16_t freq;
+		uint8_t channel;
+		uint8_t maxpower;
+	};
+
+	struct Mcs {
+		uint8_t known;
+		uint8_t flags;
+		uint8_t mcs;
+	};
+
+	struct AMpdu {
+		uint32_t reference_number;
+		uint16_t flags;
+		uint8_t delimiter_CRC_value;
+		uint8_t reserved;
+	};
+
+	struct Vht {
+		uint16_t known;
+		uint8_t flags;
+		uint8_t bandwidth;
+		uint8_t mcs_nss[4];
+		uint8_t coding;
+		uint8_t group_id;
+		uint16_t partial_aid;
+	};
+
+	struct Times {
+		uint64_t timestamp;
+		uint16_t accuracy;
+		uint8_t unit_position;
+		uint8_t flags;
+	};
+
+	struct He {
+		uint16_t data1;
+		uint16_t data2;
+		uint16_t data3;
+		uint16_t data4;
+		uint16_t data5;
+		uint16_t data6;
+	};
+
+	struct HeMu {
+		uint16_t flags1;
+		uint16_t flags2;
+		uint8_t RU_channel1[4];
+		uint8_t RU_channel2[4];
+	};
+
+	struct HeMuOtherUser {
+		uint16_t per_user_1;
+		uint16_t per_user_2;
+		uint8_t per_user_position;
+		uint8_t per_user_known;
+	};
+
+	struct ZeroLengthPsdu {
+		uint8_t type;
+	};
+
+	struct LSig {
+		uint16_t data1;
+		uint16_t data2;
+	};
+
+	struct Tlv {
+		// 상세 정보가 주어지지 않아서, 일단 빈 구조체로 둡니다.
+	};
+
+	struct RadiotapNamespace {
+		// 내용이 없다고 주어져 있어서, 일단 빈 구조체로 둡니다.
+	};
+
+	struct VendorNamespace {
+		uint8_t OUI[3];
+		uint8_t sub_namespace;
+		uint16_t skip_length;
+	};
+
+	struct Ext {
+		// 내용이 없다고 주어져 있어서, 일단 빈 구조체로 둡니다.
+	};
+}
+
 inline uint32_t getMaskRadiotapPresence(enum ieee80211_radiotap_presence presence){
 	return 1<<presence;
 }
