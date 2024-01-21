@@ -1,16 +1,22 @@
 #include "pch.h"
-#include <stdio.h>
+
 bool debug_mode = false;
-
 int main(int argc, char* argv[]){
-    for(int i = 1; i<argc; i++)
-        if(std::string(argv[i]) == "--debug")
-            debug_mode = true;
-
     char errbuf[PCAP_ERRBUF_SIZE];
+    for(int i = 1; i<argc; i++)
+        std::string argument = std::string(argv[i]);
+        if(argument == "--debug")
+            debug_mode = true;
+    if(std::string(argv[0]).find("beacon-flood") != std::string::npos){
+        if(argc != 3){
+            puts("Usage : beacon-flood <interface> <ssid-list-file>");
+            HANDLE_ERROR_EXIT_0("main", errbuf);
+        }
+        beaconFlood(std::string(argv[1]), std::string(argv[2]));
+        exit(0);
+    }
     std::string interface_name;
     pcap_t *pcap_descripter;
-
     //USE_ALTERNATE_BUFFER();
     printFirstDescribe();
     interface_name = getInterfaceUserChoice();
@@ -37,7 +43,7 @@ int main(int argc, char* argv[]){
     while(res = pcap_next_ex(pcap_descripter, &packet_info, &packet)>=0){
         //패킷이 없어서 time out되었음
         if(res==0)
-            continue;
+            break;
         //GUI처리
         
         //패킷 처리

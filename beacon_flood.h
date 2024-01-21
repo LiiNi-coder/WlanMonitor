@@ -1,0 +1,1 @@
+void beaconFlood(std::string interface_name, std::string file_name);
